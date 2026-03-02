@@ -148,20 +148,10 @@ Resources:
       GroupDescription: Allow HTTP access from internet
       VpcId: !Ref VPC
       SecurityGroupIngress:
-        # SSH
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: "0.0.0.0/0"
         # http  
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: "0.0.0.0/0"
-        # Springboot 
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
           CidrIp: "0.0.0.0/0"
       Tags:
         - Key: Name
@@ -203,7 +193,7 @@ Resources:
       UnhealthyThresholdCount: 2
       Name: aws-study-cfntg
       VpcId: !Ref VPC
-      Port: 80
+      Port: 8080
       Matcher:
         HttpCode: 200,300,301
       Targets:
@@ -242,17 +232,17 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: "0.0.0.0/0"
-        # http  
+          CidrIp: !Ref MyIP
+        # http 
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: "0.0.0.0/0"
-        # Springboot 
+        # Springboot and only access from ALB
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
-          CidrIp: "0.0.0.0/0"
+          SourceSecurityGroupId: !Ref ALBSG
       Tags:
         - Key: Name
           Value: aws-study-cfnec2sg  
