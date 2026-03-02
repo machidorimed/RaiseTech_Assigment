@@ -9,7 +9,7 @@ Outputs:
   RDSEndpoint:
     Description: RDS Endpoint
     Value: !GetAtt RDS.Endpoint.Address  
-    
+
 Parameters: 
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instance
@@ -19,7 +19,7 @@ Parameters:
   MyIP:
     Description: IP address allowed to access EC2
     Type: String
-    Default: 61.44.234.6/32
+    Default: 103.5.140.129/32
 
   DatabaseMasterName:
     Description: Database Master User Name
@@ -258,7 +258,6 @@ Resources:
       InstanceType: t2.micro
       ImageId: ami-070d2b24928913a49
       KeyName: !Ref KeyName
-      VpcId: !Ref VPC
       # 削除保護
       DisableApiTermination: false
       NetworkInterfaces: 
