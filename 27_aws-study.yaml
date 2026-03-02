@@ -1,6 +1,15 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Provision ALB & EC2 & RDS
 
+Outputs:
+  ALBDNSName:
+    Description: ALB DNS Name
+    Value: !GetAtt ALB.DNSName
+
+  RDSEndpoint:
+    Description: RDS Endpoint
+    Value: !GetAtt RDS.Endpoint.Address  
+    
 Parameters: 
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instance
@@ -21,7 +30,6 @@ Parameters:
     Description: Database Master User Password
     Type: String
     NoEcho: true
-    Default: 48694062
 
   DatabaseName:
     Description: Database Name
