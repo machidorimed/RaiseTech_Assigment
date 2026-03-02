@@ -200,8 +200,6 @@ Resources:
         # If the target type is instance, you cannot override the Availability Zone
         - Id: !Ref EC2
           Port: 8080
-        - Id: !Ref EC2
-          Port: 80  
       Tags:
         - Key: Name
           Value: aws-study-cfntg        
@@ -233,11 +231,6 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: !Ref MyIP
-        # http 
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: "0.0.0.0/0"
         # Springboot and only access from ALB
         - IpProtocol: tcp
           FromPort: 8080
