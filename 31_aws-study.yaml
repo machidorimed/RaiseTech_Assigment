@@ -1,14 +1,22 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Provision ALB & EC2 & RDS
+Description: Watch EC2 instance CPUUtilization and connect WAF For ALB
 
 Outputs:
   ALBDNSName:
     Description: ALB DNS Name
     Value: !GetAtt ALB.DNSName
 
-  RDSEndpoint:
-    Description: RDS Endpoint
-    Value: !GetAtt RDS.Endpoint.Address  
+  WebACLArn:
+    Description: WAF WebACL ARN
+    Value: !GetAtt WebACL.Arn
+
+  WAFLogGroupArn:
+    Description: WAF LogGroup ARN
+    Value: !GetAtt WAFLogGroup.Arn
+
+  SNSTopicArn:
+    Description: SNS Topic ARN
+    Value: !Ref SNSTopic  
 
 Parameters: 
   KeyName:
@@ -16,25 +24,14 @@ Parameters:
     Type: "AWS::EC2::KeyPair::KeyName"
     Default: marube23
 
-  MyIP:
-    Description: IP address allowed to access EC2
+  MyEmail:
+    Description: Email address from SNS Topic
     Type: String
-    Default: 103.5.140.129/32
 
-  DatabaseMasterName:
-    Description: Database Master User Name
-    Type : String
-    Default: root
-
-  DatabaseMasterPassword:
-    Description: Database Master User Password
-    Type: String
-    NoEcho: true
-
-  DatabaseName:
-    Description: Database Name
-    Type : String
-    Default: awsstudy
+  BlockIPAddresses:
+    Description: "Blacklist for Blocking IP adress"
+    Type: CommaDelimitedList
+    Default: 61.44.234.6/32
 
 Resources:
   # ------------------------------------------------------------#
@@ -201,13 +198,13 @@ Resources:
       UnhealthyThresholdCount: 2
       Name: aws-study-cfntg
       VpcId: !Ref VPC
-      Port: 8080
+      Port: 80
       Matcher:
         HttpCode: 200,300,301
       Targets:
         # If the target type is instance, you cannot override the Availability Zone
         - Id: !Ref EC2
-          Port: 8080
+          Port: 80
       Tags:
         - Key: Name
           Value: aws-study-cfntg        
@@ -231,18 +228,13 @@ Resources:
   EC2SG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow SSH and HTTP and Springboot from Internet
+      GroupDescription: Allow HTTP and only access from ALB
       VpcId: !Ref VPC
       SecurityGroupIngress:
-        # SSH
+        # HTTP and only access from ALB
         - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: !Ref MyIP
-        # Springboot and only access from ALB
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
+          FromPort: 80
+          ToPort: 80
           SourceSecurityGroupId: !Ref ALBSG
       Tags:
         - Key: Name
@@ -261,9 +253,9 @@ Resources:
       # 削除保護
       DisableApiTermination: false
       NetworkInterfaces: 
-        - AssociatePublicIpAddress: "true"
-          DeviceIndex: "0"
-          SubnetId: !Ref PubSubA
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
+          SubnetId: !Ref PriSubA
           GroupSet:
             - !Ref EC2SG
       Tags:
@@ -271,84 +263,178 @@ Resources:
           Value: aws-study-cfnec2
 
   # ------------------------------------------------------------#
-  #  Database Subnet Group
-  # ------------------------------------------------------------#
-  RDSDBSubnetGroup:
-    Type: AWS::RDS::DBSubnetGroup
+  #  CloudWatch Alarm
+  # ------------------------------------------------------------#        
+  EC2CPUUtilizationAlarm:
+    Type: AWS::CloudWatch::Alarm
     Properties:
-      DBSubnetGroupDescription: aws-study-cfndbsg
-      DBSubnetGroupName: aws-study-cfndbsg
-      SubnetIds:
-        - !Ref PriSubA
-        - !Ref PriSubC
-      Tags:
-        - Key: Name
-          Value: aws-study-cfndbsg
+      ### 基本設定
+      AlarmName: aws-study-cfn-cpu-utilization-alarm
+      AlarmDescription: "aws-study-cfnec2 の 60 秒間の 平均 CPU使用率が 0.1 %以上になりました。 SNSに通知します"
+
+      ### メトリクス
+      Namespace: "AWS/EC2"
+      Dimensions:
+        - Name: "InstanceId"
+          Value: !Ref EC2
+      MetricName: "CPUUtilization"
+      Unit: "Percent"
+
+      ### 統計
+      Period: 60
+      Statistic: "Average"
+
+      ### 評価
+      Threshold: 0.1
+      # 比較に用いる算術演算
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      # 評価する期間の数
+      EvaluationPeriods: 1
+      # 「しきい値超過」の数
+      DatapointsToAlarm: 1
+      TreatMissingData: "missing"
+
+      ### アクション
+      ActionsEnabled: True
+      AlarmActions:
+        - !Ref SNSTopic
 
   # ------------------------------------------------------------#
-  #  RDS Security Group
-  # ------------------------------------------------------------#
-  RDSSG:
-    Type: AWS::EC2::SecurityGroup
+  #  Amazon SNS Topic
+  # ------------------------------------------------------------# 
+  SNSTopic:
+    Type: AWS::SNS::Topic
     Properties:
-      GroupName: aws-study-cfnrdssg
-      GroupDescription: Allow Request from WebServer
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        # https and only access from EC2
-        - IpProtocol: tcp
-          FromPort: 3306
-          ToPort: 3306
-          SourceSecurityGroupId: !Ref EC2SG
+      TopicName: aws-study-cfn-topic
       Tags:
         - Key: Name
-          Value: aws-study-cfnrdssg
+          Value: aws-study-cfn-topic
 
   # ------------------------------------------------------------#
-  #  RDS
-  # ------------------------------------------------------------#
-  RDS:
-    Type: AWS::RDS::DBInstance
+  #  E-mail Subscription
+  # ------------------------------------------------------------#         
+
+  AlarmEmailSubscription:
+    Type: AWS::SNS::Subscription
     Properties:
-      Engine: mysql
-      EngineVersion: 8.0.41
-      # シングルAZ
-      MultiAZ: false
-      DBInstanceIdentifier: aws-study-cfnrds
-      MasterUsername: !Ref DatabaseMasterName
-      MasterUserPassword: !Ref DatabaseMasterPassword
-      DBInstanceClass: db.t4g.micro
-      StorageType: gp2
-      # ストレージ割り当て
-      AllocatedStorage: 20
-      DBSubnetGroupName: !Ref RDSDBSubnetGroup
-      # パブリック接続不許可
-      PubliclyAccessible: false
-      VPCSecurityGroups:
-        - !Ref RDSSG  
-      AvailabilityZone: !Select [0, !GetAZs '']
-      DBName: !Ref DatabaseName
-      # 自動バックアップ保有期間
-      BackupRetentionPeriod: 1
-      # DB暗号化
-      StorageEncrypted: true
-      # CloudWatch Logsへのログの有効化
-      EnableCloudwatchLogsExports:
-        - audit
-        - error
-        - general
-        - slowquery
-      # メジャーバージョンアップグレードを許可
-      AllowMajorVersionUpgrade: false
-      # マイナーバージョン自動アップグレードの有効化
-      AutoMinorVersionUpgrade: true
-      # 削除時の自動バックアップ同時削除許可
-      DeleteAutomatedBackups: true
-      # 削除保護
-      DeletionProtection: false
+      TopicArn: !Ref SNSTopic
+      Protocol: email
+      Endpoint: !Ref MyEmail     
+
+  # ------------------------------------------------------------#
+  #  AWS WAF v2
+  # ------------------------------------------------------------# 
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: aws-study-cfnalb-waf
+      DefaultAction:
+        Allow: {}
+      Scope: REGIONAL
+      Description: "Web ACL for InternetALB"
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: aws-study-cfnalb-waf
+        SampledRequestsEnabled: true
+      Rules:
+        ## 指定したIPアドレスからのアクセスをブロックする
+        - Name: IPAddressBlacklistRule
+          Priority: 1
+          Statement:
+            IPSetReferenceStatement:
+              Arn: !GetAtt IPBlacklist.Arn
+          Action:
+            Block: {}
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: IPAddressBlacklistRule
+            SampledRequestsEnabled: true
+
+  # ------------------------------------------------------------#
+  # Block IP Address
+  # ------------------------------------------------------------# 
+  IPBlacklist:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Name: IPAddressBlacklist
+      Scope: REGIONAL
+      IPAddressVersion: IPV4
+      Addresses: !Ref BlockIPAddresses
+
+  # ------------------------------------------------------------# 
+  # WebACLAssociation
+  # ------------------------------------------------------------# 
+  ## WAF と ALB を連携する設定。
+  ## WAF と CloudFront 連携時は不要。
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !GetAtt ALB.LoadBalancerArn
+      WebACLArn: !GetAtt WebACL.Arn    
+
+  # ------------------------------------------------------------# 
+  # WAFv2 Log Config
+  # ------------------------------------------------------------# 
+  WAFLogsConfig:
+    DependsOn: WebACLAssociation
+    Type: AWS::WAFv2::LoggingConfiguration
+    Properties:
+      # ログデータの送信先
+      LogDestinationConfigs:
+        - !GetAtt WAFLogGroup.Arn
+      # ログデータを出力するWAFのARN
+      ResourceArn: !GetAtt WebACL.Arn
+
+  # ------------------------------------------------------------# 
+  # CloudWatch Logs Log Group (WAFv2)
+  # ------------------------------------------------------------# 
+  WAFLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      # aws-waf-logs-から始まる名前にすること。
+      LogGroupName: aws-waf-logs-study-cfnalb
+      # ログ保存期間
+      RetentionInDays: 30
       Tags:
         - Key: Name
-          Value: aws-study-cfnrds
-      
+          Value: aws-waf-logs-study-cfnalb
 
-  
+  # ------------------------------------------------------------# 
+  # CloudWatch Logs Resource Policy
+  # ------------------------------------------------------------#   
+  WAFLogResourcePolicy:
+    Type: AWS::Logs::ResourcePolicy
+    Properties:
+      PolicyName: WAFLogPolicy
+      ## CloudWatch Logs に自分のアカウントの WAF サービスに対して 
+      ## WAFLogGroup の全ログストリームの作成とログ書き込みを
+      ## 許可するリソースベースポリシーを付与する。
+      PolicyDocument:
+        Fn::Sub:
+          - |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "AWSWAFLogs",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "delivery.logs.amazonaws.com"
+                  },
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "${CloudWatchLogsLogGroupArn}",
+                  "Condition": {
+                    "StringEquals": {
+                      "aws:SourceAccount": ${AWS::AccountId}
+                    },
+                    "ArnLike": {
+                      "aws:SourceArn": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                    }
+                  }
+                }
+              ]
+            }
+          - CloudWatchLogsLogGroupArn: !GetAtt WAFLogGroup.Arn       
