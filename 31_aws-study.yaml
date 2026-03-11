@@ -253,8 +253,8 @@ Resources:
       # 削除保護
       DisableApiTermination: false
       NetworkInterfaces: 
-        - AssociatePublicIpAddress: "false"
-          DeviceIndex: "0"
+        - AssociatePublicIpAddress: false
+          DeviceIndex: 0
           SubnetId: !Ref PriSubA
           GroupSet:
             - !Ref EC2SG
@@ -369,7 +369,7 @@ Resources:
   WebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
     Properties:
-      ResourceArn: !Ref ALB
+      ResourceArn: !GetAtt ALB.LoadBalancerArn
       WebACLArn: !GetAtt WebACL.Arn    
 
   # ------------------------------------------------------------# 
