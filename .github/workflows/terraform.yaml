@@ -40,8 +40,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: hashicorp/setup-terraform@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
 
       - run: terraform init
       - run: terraform fmt -check -recursive
@@ -70,7 +71,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
 
       - run: terraform init
       - run: terraform apply -auto-approve
@@ -101,7 +104,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
 
       - run: terraform init
       - run: terraform plan
