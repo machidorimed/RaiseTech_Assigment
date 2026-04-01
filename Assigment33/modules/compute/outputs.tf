@@ -17,3 +17,8 @@ output "albdns_name" {
 output "alb_arn" {
   value = aws_lb.alb.arn
 }
+
+#terraform test用
+output "ec2_instance_type" {
+  value = aws_instance.ec2.instance_type
+}

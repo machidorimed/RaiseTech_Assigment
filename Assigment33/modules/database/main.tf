@@ -80,6 +80,7 @@ resource "aws_db_instance" "rds" {
   delete_automated_backups = true
   # 削除保護
   deletion_protection = false
+  skip_final_snapshot = true
   tags = {
     Name = "aws-study-${var.my_env}rds"
   }

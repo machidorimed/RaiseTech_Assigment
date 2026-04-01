@@ -8,7 +8,7 @@ output "waf_log_group_arn" {
 
 output "sns_topic_arn" {
   description = "SNS Topic ARN"
-  value       = aws_sns_topic.sns_topic.id
+  value       = aws_sns_topic.sns_topic.arn
 }
 
 output "waf_log_group_id" {
