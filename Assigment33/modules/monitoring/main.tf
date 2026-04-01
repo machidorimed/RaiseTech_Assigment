@@ -4,7 +4,7 @@
 resource "aws_cloudwatch_metric_alarm" "ec2_cpu_utilization_alarm" {
   ### 基本設定
   alarm_name        = "aws-study-${var.my_env}-cpu-utilization-alarm"
-  alarm_description = "aws-study-${var.my_env}ec2 の 60 秒間の 平均 CPU使用率が 80 %以上になりました。 SNSに通知します"
+  alarm_description = "aws-study-${var.my_env}ec2 の 60 秒間の 平均 CPU使用率が 0.1 %以上になりました。 SNSに通知します"
 
   ### メトリクス
   namespace = "AWS/EC2"
@@ -19,7 +19,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_cpu_utilization_alarm" {
   statistic = "Average"
 
   ### 評価
-  threshold = 80
+  threshold = 0.1
   # 比較に用いる算術演算
   comparison_operator = "GreaterThanOrEqualToThreshold"
   # 評価する期間の数
