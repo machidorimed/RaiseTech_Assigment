@@ -76,7 +76,6 @@ jobs:
           terraform_version: 1.8.5
 
       - run: terraform init
-      
       - run: terraform apply -auto-approve
 
   # ------------------------------------------------------------#
@@ -88,6 +87,8 @@ jobs:
     needs: terraform-stage-apply
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+
+    environment: stage
 
     defaults:
       run:
