@@ -76,6 +76,7 @@ jobs:
           terraform_version: 1.8.5
 
       - run: terraform init
+      
       - run: terraform apply -auto-approve
 
   # ------------------------------------------------------------#
