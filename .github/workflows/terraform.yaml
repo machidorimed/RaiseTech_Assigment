@@ -76,15 +76,48 @@ jobs:
           terraform_version: 1.8.5
 
       - run: terraform init
-      - run: terraform apply -auto-approve
+      # - run: terraform apply -auto-approve
+
+  # ------------------------------------------------------------#
+  # Test for prod when request is marged
+  # ------------------------------------------------------------#
+  terraform-prod-plan:
+    # マージされた時、prod環境で test と plan 実行
+    # stage環境 apply 後
+    needs: terraform-stage-apply
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: envs/prod
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ap-northeast-1
+      TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - run: terraform init
+      - run: terraform fmt -check -recursive
+      - run: terraform validate
+      - run: terraform test
+      - run: terraform plan
 
   # ------------------------------------------------------------#
   # Apply for prod after approval
   # ------------------------------------------------------------#
   terraform-prod-apply:
     # stage環境が問題なく動くのを確認し、手動で承認後prod環境をデプロイ
-    # stage環境 apply 後
-    needs: terraform-stage-apply
+    # prod環境 plan 後
+    needs: terraform-prod-plan
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
@@ -109,5 +142,4 @@ jobs:
           terraform_version: 1.8.5
 
       - run: terraform init
-      - run: terraform plan
-      - run: terraform apply -auto-approve
+      # - run: terraform apply -auto-approve
