@@ -76,7 +76,7 @@ jobs:
           terraform_version: 1.8.5
 
       - run: terraform init
-      # - run: terraform apply -auto-approve
+      - run: terraform apply -auto-approve
 
   # ------------------------------------------------------------#
   # Test for prod when request is marged
@@ -141,5 +141,6 @@ jobs:
         with:
           terraform_version: 1.8.5
 
+
       - run: terraform init
-      # - run: terraform apply -auto-approve
+      - run: terraform apply -auto-approve
