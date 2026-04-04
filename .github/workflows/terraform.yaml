@@ -170,4 +170,4 @@ jobs:
           aws-region: ap-northeast-1           
 
       - run: terraform init
-      # - run: terraform apply -auto-approve
+      - run: terraform apply -auto-approve
