@@ -32,17 +32,24 @@ jobs:
         working-directory: envs/stage
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
+    permissions:
+      id-token: write
+      contents: read  
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1    
 
       - run: terraform init
       - run: terraform fmt -check -recursive
@@ -63,20 +70,27 @@ jobs:
         working-directory: envs/stage
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
+    permissions:
+      id-token: write
+      contents: read  
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.5
 
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1    
+    
       - run: terraform init
-      - run: terraform apply -auto-approve
+      # - run: terraform apply -auto-approve
 
   # ------------------------------------------------------------#
   # Test for prod when request is marged
@@ -93,17 +107,24 @@ jobs:
         working-directory: envs/prod
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
+    permissions:
+      id-token: write
+      contents: read    
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1        
 
       - run: terraform init
       - run: terraform fmt -check -recursive
@@ -129,17 +150,24 @@ jobs:
         working-directory: envs/prod
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
+    permissions:
+      id-token: write
+      contents: read  
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1           
 
       - run: terraform init
       - run: terraform apply -auto-approve
