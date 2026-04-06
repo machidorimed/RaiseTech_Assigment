@@ -147,7 +147,7 @@ jobs:
 
       - name: Run Ansible
         run: |
-          ansible-playbook -i inventory ansible/playbook.yaml
+          ansible-playbook -i inventory ../../ansible/playbook.yaml
 
   # ------------------------------------------------------------#
   # Test for prod when request is marged
