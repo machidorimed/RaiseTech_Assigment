@@ -9,7 +9,7 @@ priC_cidr_block = "10.0.4.0/24"
 
 
 # 変数へ値の設定(compute)
-my_ip            = "61.44.234.6/32"
+my_ip            = "103.5.140.188/32"
 my_ami           = "ami-070d2b24928913a49"
 my_instance_type = "t2.micro"
 key_name         = "marube23"
@@ -27,4 +27,4 @@ my_instance_class    = "db.t4g.micro"
 
 
 # 変数へ値の設定(security)
-allow_ip_addresses = ["61.44.234.6/32"]
+allow_ip_addresses = ["103.5.140.188/32"]
