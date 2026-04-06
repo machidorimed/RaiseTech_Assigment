@@ -126,10 +126,17 @@ jobs:
           sudo apt update
           sudo apt install -y ansible
 
+      - name: Debug SSH
+        run: |
+          set -x
+          mkdir -p ~/.ssh
+          echo "HOME=$HOME"
+          ls -la ~
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          printf "%s" "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $EC2_IP >> ~/.ssh/known_hosts
 
