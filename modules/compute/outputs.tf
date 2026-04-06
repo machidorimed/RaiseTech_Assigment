@@ -22,3 +22,8 @@ output "alb_arn" {
 output "ec2_instance_type" {
   value = aws_instance.ec2.instance_type
 }
+
+# ansible用
+output "ec2_public_ip" {
+  value = aws_instance.example.public_ip
+}
