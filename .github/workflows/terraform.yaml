@@ -135,7 +135,7 @@ jobs:
       # SSM接続用 API & SDK インストール
       - name: Install dependencies
         run: |
-          pip install boto3 botocore
+          pipx inject ansible-core boto3 botocore
           ansible-galaxy collection install amazon.aws
 
       - name: Create inventory
