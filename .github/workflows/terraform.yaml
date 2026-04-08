@@ -127,10 +127,11 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
 
+      # SSMに最適な ansible インストール
       - name: Install Ansible
         run: |
-          sudo apt update
-          sudo apt install -y ansible
+          pipx uninstall ansible-core || true
+          pipx install "ansible-core==2.16.6"
       
       # SSM接続用 API & SDK インストール
       - name: Install dependencies
