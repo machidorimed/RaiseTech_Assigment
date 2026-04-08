@@ -95,10 +95,10 @@ jobs:
       - run: terraform init
       - run: terraform apply -auto-approve
 
-      - name: Get EC2 IP
+      - name: Get instance ID
         id: tf-output
         run: |
-          echo "ec2_ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
+          echo "instance_id=$(terraform output -raw instance_id)" >> $GITHUB_OUTPUT
 
   ansible-stage:
     needs: terraform-stage-apply  
@@ -109,11 +109,14 @@ jobs:
       run:
         working-directory: envs/stage
 
+    outputs:
+      instance_id: ${{ steps.tf-output.outputs.instance_id }}    
+
     env:
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
-      EC2_IP: ${{ needs.terraform-stage-apply.outputs.ec2_ip }}
+      EC2_INSTANCE_ID: ${{ needs.terraform-stage-apply.outputs.instance_id }}
 
     permissions:
       id-token: write
@@ -121,29 +124,21 @@ jobs:
 
     steps:    
       - uses: actions/checkout@v5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
       - name: Install Ansible
         run: |
           sudo apt update
           sudo apt install -y ansible
 
-      - name: Debug SSH
-        run: |
-          set -x
-          mkdir -p ~/.ssh
-          echo "HOME=$HOME"
-          ls -la ~
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          printf "%s" "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $EC2_IP >> ~/.ssh/known_hosts
-
       - name: Create inventory
         run: |
           echo "[web]" > inventory
-          echo "$EC2_IP ansible_user=ec2-user" >> inventory
+          echo "$EC2_INSTANCE_ID ansible_connection=aws_ssm ansible_user=ec2-user" >> inventory
 
       - name: Run Ansible
         run: |

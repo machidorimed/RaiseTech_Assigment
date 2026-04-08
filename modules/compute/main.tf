@@ -126,8 +126,10 @@ resource "aws_security_group" "ec2_sg" {
 #  EC2
 # ------------------------------------------------------------#
 resource "aws_instance" "ec2" {
-  ami                         = var.my_ami
-  instance_type               = var.my_instance_type
+  ami           = var.my_ami
+  instance_type = var.my_instance_type
+  # セッションマネージャー用IAMロール
+  iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
   key_name                    = var.key_name
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
   subnet_id                   = var.public_subnet_id
@@ -141,4 +143,32 @@ resource "aws_instance" "ec2" {
   tags = {
     Name = "aws-study-${var.my_env}ec2"
   }
+}
+
+# ------------------------------------------------------------#
+#  AWS Systems Manager Session Manager IAM Role
+# ------------------------------------------------------------#
+resource "aws_iam_role" "ssm_role" {
+  name = "aws-study-${var.my_env}-ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_attach" {
+  role       = aws_iam_role.ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm_profile" {
+  name = "aws-study-${var.my_env}-ssm-profile"
+  role = aws_iam_role.ssm_role.name
 }
