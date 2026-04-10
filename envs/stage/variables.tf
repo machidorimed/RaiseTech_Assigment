@@ -44,41 +44,41 @@ variable "key_name" {
   type        = string
 }
 
-variable "my_engine" {
-  type = string
-}
+#variable "my_engine" {
+#  type = string
+#}
 
-variable "my_engine_version" {
-  type = string
-}
+#variable "my_engine_version" {
+#  type = string
+#}
 
-variable "database_master_name" {
-  description = "Database Master User Name"
-  type        = string
-}
+#variable "database_master_name" {
+#  description = "Database Master User Name"
+#  type        = string
+#}
 
-variable "database_master_password" {
-  description = "Database Master User Password"
-  type        = string
-  sensitive   = true
-}
+#variable "database_master_password" {
+#  description = "Database Master User Password"
+#  type        = string
+#  sensitive   = true
+#}
 
-variable "my_instance_class" {
-  type = string
-}
+#variable "my_instance_class" {
+#  type = string
+#}
 
-variable "database_name" {
-  description = "Database Name"
-  type        = string
-}
+#variable "database_name" {
+#  description = "Database Name"
+#  type        = string
+#}
 
-variable "my_email" {
-  description = "Email address from SNS Topic"
-  type        = string
-}
+#variable "my_email" {
+#  description = "Email address from SNS Topic"
+#  type        = string
+#}
 
-variable "allow_ip_addresses" {
-  description = "Whitelist for Enter IP adress"
-  type        = list(string)
+#variable "allow_ip_addresses" {
+#  description = "Whitelist for Enter IP adress"
+#  type        = list(string)
 
-}
+#}

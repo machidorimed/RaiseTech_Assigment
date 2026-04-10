@@ -16,15 +16,15 @@ key_name         = "marube23"
 
 
 # 変数へ値の設定(database)
-my_engine            = "mysql"
-my_engine_version    = "8.0.41"
-database_master_name = "root"
-database_name        = "awsstudy"
-my_instance_class    = "db.t4g.micro"
+#my_engine            = "mysql"
+#my_engine_version    = "8.0.41"
+#database_master_name = "root"
+#database_name        = "awsstudy"
+#my_instance_class    = "db.t4g.micro"
 
 
 # 変数へ値の設定(monitoring)
 
 
 # 変数へ値の設定(security)
-allow_ip_addresses = ["103.5.140.188/32"]
+#allow_ip_addresses = ["103.5.140.188/32"]
