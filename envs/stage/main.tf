@@ -48,27 +48,27 @@ module "compute" {
   my_ip            = var.my_ip
   my_ami           = var.my_ami
   my_instance_type = var.my_instance_type
-  key_name         = var.key_name
+  #  key_name         = var.key_name
 }
 
-#module "database" {
-# moduleの位置
-#  source = "../../modules/database"
-# 変数へ値の設定
-#  subnet_ids = [
-#    module.network.pri_sub_a_id,
-#    module.network.pri_sub_c_id
-#  ]
-#  vpc_id                   = module.network.vpc_id
-#  ec2_sg_id                = module.compute.ec2_sg_id
-#  my_env                   = var.my_env
-#  my_engine                = var.my_engine
-#  my_engine_version        = var.my_engine_version
-#  database_master_name     = var.database_master_name
-#  database_name            = var.database_name
-#  my_instance_class        = var.my_instance_class
-#  database_master_password = var.database_master_password
-#}
+module "database" {
+  # moduleの位置
+  source = "../../modules/database"
+  # 変数へ値の設定
+  subnet_ids = [
+    module.network.pri_sub_a_id,
+    module.network.pri_sub_c_id
+  ]
+  vpc_id                   = module.network.vpc_id
+  ec2_sg_id                = module.compute.ec2_sg_id
+  my_env                   = var.my_env
+  my_engine                = var.my_engine
+  my_engine_version        = var.my_engine_version
+  database_master_name     = var.database_master_name
+  database_name            = var.database_name
+  my_instance_class        = var.my_instance_class
+  database_master_password = var.database_master_password
+}
 
 module "monitoring" {
   # moduleの位置

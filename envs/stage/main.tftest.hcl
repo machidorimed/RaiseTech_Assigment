@@ -1,8 +1,8 @@
 # test 用の参照値
-#variables {
-#  database_master_password = "dummy-password"
-#  my_email                 = "test@example.com"
-#}
+variables {
+  database_master_password = "dummy-password"
+  #  my_email                 = "test@example.com"
+}
 
 # ------------------------------------------------------------#
 #  Network Test
@@ -56,21 +56,21 @@ run "compute_EC2_test" {
 # ------------------------------------------------------------#
 #  Database Test
 # ------------------------------------------------------------#
-#run "database_RDS_test" {
-#  command = plan
+run "database_RDS_test" {
+  command = plan
 
-#  assert {
-#    condition     = module.database.rds_instance_summary.engine == "mysql"
-#    error_message = "RDSのengineが不一致"
-#  }
+  assert {
+    condition     = module.database.rds_instance_summary.engine == "mysql"
+    error_message = "RDSのengineが不一致"
+  }
 
-#  assert {
-#    condition     = module.database.rds_instance_summary.engine_version == "8.0.41"
-#    error_message = "RDSのengine_versionが不一致"
-#  }
+  assert {
+    condition     = module.database.rds_instance_summary.engine_version == "8.0.41"
+    error_message = "RDSのengine_versionが不一致"
+  }
 
-#  assert {
-#    condition     = module.database.rds_instance_summary.instance_class == "db.t4g.micro"
-#    error_message = "RDSのinstance_classが不一致"
-#  }
-#}
+  assert {
+    condition     = module.database.rds_instance_summary.instance_class == "db.t4g.micro"
+    error_message = "RDSのinstance_classが不一致"
+  }
+}
