@@ -48,7 +48,7 @@ run "compute_EC2_test" {
   command = plan
 
   assert {
-    condition     = module.compute.ec2_instance_type == "t2.micro"
+    condition     = module.compute.ec2_instance_type == "t3.micro"
     error_message = "EC2のinstance_typeが不一致"
   }
 }

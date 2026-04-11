@@ -11,7 +11,7 @@ priC_cidr_block = "172.16.4.0/24"
 # 変数へ値の設定(compute)
 my_ip            = "0.0.0.0/0"
 my_ami           = "ami-070d2b24928913a49"
-my_instance_type = "t2.micro"
+my_instance_type = "t3.micro"
 #key_name         = "marube23"
 
 
