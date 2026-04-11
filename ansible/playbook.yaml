@@ -20,9 +20,14 @@
           - git
         state: present
 
+    - name: Download MySQL repo rpm
+      get_url:
+        url: https://dev.mysql.com/get/mysql84-community-release-el9-1.noarch.rpm
+        dest: /tmp/mysql84-community-release.rpm    
+
     - name: Install MySQL repo
       dnf:
-        name: https://dev.mysql.com/get/mysql84-community-release-el9-1.noarch.rpm
+        name: /tmp/mysql84-community-release.rpm
         state: present
 
     - name: Install MySQL client
