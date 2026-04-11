@@ -32,7 +32,7 @@
       rpm_key:
         key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
         state: present
-        
+
     - name: Install MySQL repo
       dnf:
         name: /tmp/mysql84-community-release.rpm
@@ -90,13 +90,12 @@
         mode: '0755'
 
     - name: Build with Gradle
-      command: ./gradlew build
+      shell: ./gradlew build --no-daemon
       args:
         chdir: "{{ app_dir }}"
     
     # Springboot 起動
     - name: Run Spring Boot
-      shell: |
-        nohup java -jar build/libs/*.jar > app.log 2>&1 &
+      shell: nohup java -jar build/libs/*.jar &
       args:
         chdir: "{{ app_dir }}"
