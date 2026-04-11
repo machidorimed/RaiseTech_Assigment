@@ -22,7 +22,7 @@
 
     - name: Download MySQL repo rpm
       get_url:
-        url: https://dev.mysql.com/get/mysql84-community-release-el9-1.noarch.rpm
+        url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
         dest: /tmp/mysql84-community-release.rpm    
 
     - name: Install MySQL repo
