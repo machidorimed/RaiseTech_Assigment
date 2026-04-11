@@ -12,15 +12,15 @@ priC_cidr_block = "172.16.4.0/24"
 my_ip            = "0.0.0.0/0"
 my_ami           = "ami-070d2b24928913a49"
 my_instance_type = "t2.micro"
-key_name         = "marube23"
+#key_name         = "marube23"
 
 
 # 変数へ値の設定(database)
-#my_engine            = "mysql"
-#my_engine_version    = "8.0.41"
-#database_master_name = "root"
-#database_name        = "awsstudy"
-#my_instance_class    = "db.t4g.micro"
+my_engine            = "mysql"
+my_engine_version    = "8.0.41"
+database_master_name = "root"
+database_name        = "awsstudy"
+my_instance_class    = "db.t4g.micro"
 
 
 # 変数へ値の設定(monitoring)

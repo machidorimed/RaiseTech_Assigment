@@ -100,7 +100,8 @@
 #  S3 bucket
 # ------------------------------------------------------------#
 resource "aws_s3_bucket" "s3" {
-  bucket = "aws-study-ansible-${var.my_env}-marube23-bucket"
+  bucket        = "aws-study-ansible-${var.my_env}-marube23-bucket"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "s3_versioning" {

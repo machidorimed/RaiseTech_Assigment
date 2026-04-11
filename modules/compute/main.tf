@@ -95,12 +95,12 @@ resource "aws_security_group" "ec2_sg" {
   description = "Allow SSH and HTTP and Springboot from Internet"
   vpc_id      = var.vpc_id
   # SSH
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip] # ← listにする
-  }
+  #ingress {
+  #  from_port   = 22
+  #  to_port     = 22
+  #  protocol    = "tcp"
+  #  cidr_blocks = [var.my_ip] # ← listにする
+  #}
 
   # App only access from alb
   ingress {
@@ -130,8 +130,8 @@ resource "aws_instance" "ec2" {
   ami           = var.my_ami
   instance_type = var.my_instance_type
   # セッションマネージャー用IAMロール
-  iam_instance_profile        = aws_iam_instance_profile.ssm_profile.name
-  key_name                    = var.key_name
+  iam_instance_profile = aws_iam_instance_profile.ssm_profile.name
+  #  key_name                    = var.key_name
   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
   subnet_id                   = var.public_subnet_id
   associate_public_ip_address = true

@@ -30,7 +30,7 @@ variable "my_instance_type" {
   type = string
 }
 
-variable "key_name" {
-  description = "The EC2 Key Pair to allow SSH access to the instance"
-  type        = string
-}
+#variable "key_name" {
+#  description = "The EC2 Key Pair to allow SSH access to the instance"
+#  type        = string
+#}
