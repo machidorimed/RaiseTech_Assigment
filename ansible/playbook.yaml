@@ -96,6 +96,23 @@
     
     # Springboot 起動
     - name: Run Spring Boot
-      shell: nohup java -jar build/libs/*.jar &
+      shell: nohup java -jar $(ls build/libs/*.war) &
       args:
         chdir: "{{ app_dir }}"
+
+    # ポート待機
+    - name: Wait for port 8080
+      wait_for:
+        port: 8080
+        delay: 10
+        timeout: 60
+
+    # EC2 内部ホストで HTTP レスポンスチェック
+    - name: Check application health
+      uri:
+        url: http://localhost:8080
+        status_code: 200
+      register: result
+      retries: 10
+      delay: 5
+      until: result.status == 200
