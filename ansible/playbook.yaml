@@ -94,11 +94,25 @@
       args:
         chdir: "{{ app_dir }}"
     
-    # Springboot 起動
-    - name: Run Spring Boot
-      shell: nohup java -jar build/libs/demo-0.0.1-SNAPSHOT.war &
-      args:
-        chdir: "{{ app_dir }}"
+    # systemd サービス配置
+    - name: Create SpringBoot systemd service
+      template:
+        src: templates/myapp.service.j2
+        dest: /etc/systemd/system/myapp.service
+
+    # systemd リロード
+    - name: Reload systemd
+      command: systemctl daemon-reexec
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+
+    # SpringBoot 自動起動
+    - name: Start and enable myapp Service
+      systemd:
+        name: myapp
+        enabled: yes
+        state: restarted
 
     # ポート待機
     - name: Wait for port 8080
