@@ -96,7 +96,7 @@
     
     # Springboot 起動
     - name: Run Spring Boot
-      shell: nohup java -jar $(ls build/libs/*.war) &
+      shell: nohup java -jar build/libs/demo-0.0.1-SNAPSHOT.war &
       args:
         chdir: "{{ app_dir }}"
 
