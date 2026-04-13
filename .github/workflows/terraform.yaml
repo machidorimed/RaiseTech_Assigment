@@ -144,23 +144,25 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
 
-      # SSMに最適な ansible インストール
+      # SSM に最適な ansible インストール
       - name: Install Ansible
         run: |
           pipx uninstall ansible-core || true
           pipx install "ansible-core==2.16.6"
       
-      # SSM接続用 API & SDK インストール
+      # SSM 接続用 API & SDK インストール
       - name: Install dependencies
         run: |
           pipx inject ansible-core boto3 botocore
           ansible-galaxy collection install amazon.aws
 
+      # SSM プラグインインストール
       - name: Install session manager plugin
         run: |
           curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
           sudo dpkg -i session-manager-plugin.deb
 
+      # 動的インベントリ取得
       - name: Create inventory
         run: |
           echo "[web]" > inventory
@@ -175,3 +177,167 @@ jobs:
         run: |
           ansible-playbook -i inventory ../../ansible/playbook.yaml -vvv
 
+  # ------------------------------------------------------------#
+  # Test for prod when request is marged
+  # ------------------------------------------------------------#
+  terraform-prod-plan:
+    # マージされた時、prod環境で test と plan 実行
+    # stage環境 ansible deploy 後
+    needs: ansible-stage
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: envs/prod
+
+    env:
+      AWS_REGION: ap-northeast-1
+      TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
+#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+
+    permissions:
+      id-token: write
+      contents: read    
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1        
+
+      - run: terraform init
+      - run: terraform fmt -check -recursive
+      - run: terraform validate
+      - run: terraform test
+      - run: terraform plan
+
+  # ------------------------------------------------------------#
+  # Apply for prod after approval
+  # ------------------------------------------------------------#
+  terraform-prod-apply:
+    # stage環境が問題なく動くのを確認し、手動で承認後prod環境をデプロイ
+    # prod環境 plan 後
+    needs: terraform-prod-plan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    # 手動承認
+    environment: prod
+
+    defaults:
+      run:
+        working-directory: envs/prod
+
+    outputs:
+      instance_id: ${{ steps.tf-ec2.outputs.instance_id }}
+      s3_bucket: ${{ steps.tf-s3.outputs.s3_bucket }}
+      rds_endpoint: ${{ steps.tf-rds.outputs.rds_endpoint }}    
+
+    env:
+      AWS_REGION: ap-northeast-1
+      TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
+#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+
+    permissions:
+      id-token: write
+      contents: read  
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1           
+
+      - run: terraform init
+      - run: terraform apply -auto-approve
+
+      - name: Get instance ID
+        id: tf-ec2
+        run: |
+          echo "instance_id=$(terraform output -raw instance_id)" >> $GITHUB_OUTPUT
+
+      - name: Get S3 bucket
+        id: tf-s3
+        working-directory: ./envs/prod
+        run: |
+          echo "s3_bucket=$(terraform output -raw s3_bucket)" >> $GITHUB_OUTPUT
+
+      - name: Get RDS endpoint
+        id: tf-rds
+        run: |
+          echo "rds_endpoint=$(terraform output -raw rds_endpoint)" >> $GITHUB_OUTPUT
+
+  ansible-prod:
+    needs: terraform-prod-apply  
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: envs/prod
+
+    env:
+      AWS_REGION: ap-northeast-1
+      TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
+#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+      EC2_INSTANCE_ID: ${{ needs.terraform-prod-apply.outputs.instance_id }}
+      S3_BUCKET: ${{ needs.terraform-prod-apply.outputs.s3_bucket }}
+      RDS_ENDPOINT: ${{ needs.terraform-prod-apply.outputs.rds_endpoint }}
+      DATABASE_MASTER_NAME: ${{ secrets.DATABASE_MASTER_NAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+    permissions:
+      id-token: write
+      contents: read  
+
+    steps:    
+      - uses: actions/checkout@v5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      # SSM に最適な ansible インストール
+      - name: Install Ansible
+        run: |
+          pipx uninstall ansible-core || true
+          pipx install "ansible-core==2.16.6"
+      
+      # SSM 接続用 API & SDK インストール
+      - name: Install dependencies
+        run: |
+          pipx inject ansible-core boto3 botocore
+          ansible-galaxy collection install amazon.aws
+
+      # SSM プラグインインストール
+      - name: Install session manager plugin
+        run: |
+          curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+          sudo dpkg -i session-manager-plugin.deb
+
+      # 動的インベントリ取得
+      - name: Create inventory
+        run: |
+          echo "[web]" > inventory
+          echo "$EC2_INSTANCE_ID ansible_connection=amazon.aws.aws_ssm ansible_aws_ssm_region=ap-northeast-1 ansible_aws_ssm_bucket_name=$S3_BUCKET" >> inventory
+
+      - name: Debug inventory
+        run: cat inventory
+
+      - name: Run Ansible
+        env:
+          AWS_REGION: ap-northeast-1
+        run: |
+          ansible-playbook -i inventory ../../ansible/playbook.yaml -vvv    

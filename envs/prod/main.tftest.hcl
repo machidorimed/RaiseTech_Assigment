@@ -1,7 +1,7 @@
 # test 用の参照値
 variables {
   database_master_password = "dummy-password"
-  my_email                 = "test@example.com"
+  #  my_email                 = "test@example.com"
 }
 
 # ------------------------------------------------------------#
