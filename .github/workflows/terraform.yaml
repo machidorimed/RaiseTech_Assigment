@@ -34,7 +34,7 @@ jobs:
     env:
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
-#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
     permissions:
       id-token: write
@@ -77,7 +77,7 @@ jobs:
     env:
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
-#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
     permissions:
       id-token: write
@@ -125,7 +125,7 @@ jobs:
     env:
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
-#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
       EC2_INSTANCE_ID: ${{ needs.terraform-stage-apply.outputs.instance_id }}
       S3_BUCKET: ${{ needs.terraform-stage-apply.outputs.s3_bucket }}
       RDS_ENDPOINT: ${{ needs.terraform-stage-apply.outputs.rds_endpoint }}
@@ -194,7 +194,7 @@ jobs:
     env:
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
-#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
     permissions:
       id-token: write
@@ -242,7 +242,7 @@ jobs:
     env:
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
-#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
 
     permissions:
       id-token: write
@@ -290,7 +290,7 @@ jobs:
     env:
       AWS_REGION: ap-northeast-1
       TF_VAR_database_master_password: ${{ secrets.DB_PASSWORD }}
-#      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
+      TF_VAR_my_email: ${{ secrets.MY_EMAIL }}
       EC2_INSTANCE_ID: ${{ needs.terraform-prod-apply.outputs.instance_id }}
       S3_BUCKET: ${{ needs.terraform-prod-apply.outputs.s3_bucket }}
       RDS_ENDPOINT: ${{ needs.terraform-prod-apply.outputs.rds_endpoint }}
