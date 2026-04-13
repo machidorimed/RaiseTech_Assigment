@@ -26,4 +26,4 @@ my_instance_class    = "db.t4g.micro"
 
 
 # 変数へ値の設定(security)
-#allow_ip_addresses = ["103.5.140.188/32"]
+allow_ip_addresses = ["61.44.234.6/32"]
