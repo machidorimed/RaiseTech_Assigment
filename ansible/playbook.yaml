@@ -1,5 +1,6 @@
 - hosts: web
   become: true
+  gather_facts: false
 
   vars:
     app_dir: /home/ec2-user/app
@@ -7,6 +8,14 @@
     rds_endpoint: "{{ lookup('env', 'RDS_ENDPOINT') }}"
     db_username: "{{ lookup('env', 'DATABASE_MASTER_NAME') }}"
     db_password: "{{ lookup('env', 'DB_PASSWORD') }}"
+
+  pre_tasks:
+    - name: Wait for SSM connection
+      wait_for_connection:
+        timeout: 300
+    
+    - name: Gather facts after connection
+      setup:
 
   roles:
     - common
