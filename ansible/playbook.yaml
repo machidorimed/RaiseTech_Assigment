@@ -10,6 +10,7 @@
     db_password: "{{ lookup('env', 'DB_PASSWORD') }}"
 
   pre_tasks:
+    # SSM 接続まで待機
     - name: Wait for SSM connection
       wait_for_connection:
         timeout: 300
