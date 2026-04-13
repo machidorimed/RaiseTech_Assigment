@@ -46,4 +46,6 @@
       shell: ./gradlew build --no-daemon
       args:
         chdir: "{{ app_dir }}"
+      async: 600
+      poll: 0  
     
