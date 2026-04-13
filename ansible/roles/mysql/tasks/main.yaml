@@ -1,0 +1,22 @@
+    # MySQL インストール
+    - name: Download MySQL repo rpm
+      get_url:
+        url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
+        dest: /tmp/mysql84-community-release.rpm    
+
+    - name: Import MySQL GPG key
+      rpm_key:
+        key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+        state: present
+
+    - name: Install MySQL repo
+      dnf:
+        name: /tmp/mysql84-community-release.rpm
+        state: present
+
+    - name: Install MySQL client
+      dnf:
+        name:
+          - mysql
+          - mysql-community-client
+        state: present    

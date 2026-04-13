@@ -1,0 +1,49 @@
+    # アプリケーションインストール
+    - name: Clone repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: main
+        force: yes
+
+    # application.properties を templates に書き換え
+    - name: Replace application.properties
+      template:
+        src: application.properties.j2
+        dest: "{{ app_dir }}/src/main/resources/application.properties"
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+
+    # データベース内に必要な値を入力
+    - name: Initialize database
+      shell: |
+        mysql -h {{ rds_endpoint }} -u {{ db_username }} <<EOF
+        CREATE DATABASE IF NOT EXISTS awsstudy;
+        USE awsstudy;
+
+        CREATE TABLE IF NOT EXISTS student (
+          id INT PRIMARY KEY AUTO_INCREMENT,
+          name VARCHAR(255) NOT NULL
+        );
+
+        INSERT INTO student (name)
+        SELECT 'Kouji Enami'
+        WHERE NOT EXISTS (
+          SELECT * FROM student WHERE name='Kouji Enami'
+        );
+        EOF
+      environment:
+        MYSQL_PWD: "{{ db_password }}"
+
+    # 必要な権限を付与
+    - name: Make gradlew executable
+      file:
+        path: "{{ app_dir }}/gradlew"
+        mode: '0755'
+
+    - name: Build with Gradle
+      shell: ./gradlew build --no-daemon
+      args:
+        chdir: "{{ app_dir }}"
+    
