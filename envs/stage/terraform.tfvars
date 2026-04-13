@@ -14,7 +14,6 @@ my_ami           = "ami-070d2b24928913a49"
 my_instance_type = "t3.micro"
 #key_name         = "marube23"
 
-
 # 変数へ値の設定(database)
 my_engine            = "mysql"
 my_engine_version    = "8.0.41"
