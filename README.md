@@ -25,7 +25,8 @@
 7\. ブラウザ上で `http://<EC2_IP>:8080`もしくは`http://< ALBのDNS名>`にアクセスし動作確認。
 
 ## インフラ構成図
-![alt text](<スクリーンショット 2026-04-13 19.10.43.png>)
+<img width="1111" height="669" alt="スクリーンショット 2026-04-13 19 10 43" src="https://github.com/user-attachments/assets/f1df7158-75c7-426d-b968-dd1b7ee57085" />
+
 
 ---
 
