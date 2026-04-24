@@ -1,4 +1,6 @@
 ## GitHub Actions × Ansible によるCI/CD環境構築
+<img width="5464" height="3640" alt="名称未設定のデザイン" src="https://github.com/user-attachments/assets/b7e3dc3b-5990-4542-8d41-db9df8718681" />
+
 
 ---
 
@@ -42,6 +44,8 @@
 7\. ブラウザ上で `http://<EC2_IP>:8080`もしくは`http://< ALBのDNS名>`にアクセスし動作確認。
 
 ## インフラ構成図
+
+<img width="1111" height="669" alt="スクリーンショット 2026-04-13 19 10 43" src="https://github.com/user-attachments/assets/f845d28b-476c-440b-baca-5182d19c5628" />
 
 
 ---
