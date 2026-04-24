@@ -180,7 +180,7 @@
 - **デフォルトアクション:** Block
 - **ルール:**
     - **カスタムルール**
-        - `IPAddressWhitelistRule`: 指定したIPアドレスからの通信を許可する。
+     - `IPAddressWhitelistRule`: 指定したIPアドレスからの通信を許可する。
 - **ログ:** CloudWatch Logs Log Group(`aws-waf-logs-study-***alb`)に出力。
 
 **CloudWatch Alarm**
@@ -325,17 +325,17 @@
 - **OIDC + SSMを用いた認証方式**
   - GitHub ActionsにはOpenID Connect (OIDC)、AnsibleにはSSM Session Manager接続を採用
   - アクセスキーやSSHキーペアを使用せず、22番ポートの開放も不要な構成とした
-    - 認証情報の漏洩リスクを低減し、セキュアな運用を実現
+   - 認証情報の漏洩リスクを低減し、セキュアな運用を実現
 
 - **modules化による環境分離**
   - Terraformのmodules機能を用い、開発・本番環境を同一コードで管理
   - GitHub Actionsに承認フローを組み込み、開発環境確認後に本番環境へ反映する構成とした
-    - 環境差異による不具合を防ぎ、安全なリリースを実現
+   - 環境差異による不具合を防ぎ、安全なリリースを実現
 
 - **Systemdによるプロセス管理**
   - EC2上のアプリケーションをSystemdで管理
   - インスタンス起動時に自動起動するよう設定
-    - 手動起動の手間を排除し、運用負荷の軽減と可用性向上に貢献
+   - 手動起動の手間を排除し、運用負荷の軽減と可用性向上に貢献
 
 ---
 
