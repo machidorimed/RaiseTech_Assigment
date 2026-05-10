@@ -7,6 +7,17 @@
 # 概要
 このポートフォリオは、**Terraform** によるAWSインフラ構築と **Ansible** による構成管理を **GitHub Actions** によるCI/CDパイプラインから実行することで、「ファイルをpull requestすれば自動でテストを行い、pushするだけでアプリケーションを含めたAWSインフラ環境が出来上がる」状態まで完全自動実行する基本設計書となります。
 
+## このポートフォリオで分かること
+- GitHub Actionsを用いたCI/CDパイプライン構築
+- Terraform + Ansibleによるインフラ自動構築・構成管理
+- OIDC + SSMによるセキュアな認証設計
+
+## この構成で実現できること
+- PR作成時に自動でTerraform検証を実施
+- mainマージでインフラ〜アプリまで自動構築（約15分で完了）
+- 承認フローにより安全に本番環境へデプロイ
+- SSH不要のセキュアなサーバー管理
+
 ## 技術選定
 **インフラプロビジョニング（IaC）**
 - Terraformを採用
@@ -42,6 +53,19 @@
 6\. 同様に作成した*prod*環境のEC2に対しAnsibleを実行し、自動でアプリケーションをインストール。
 
 7\. ブラウザ上で `http://<EC2_IP>:8080`もしくは`http://< ALBのDNS名>`にアクセスし動作確認。
+
+## 動作確認方法
+1\. AWSアカウント・GitHubアカウントを用意
+
+2\. GitHub OIDCを設定（README下部参照）
+
+3\. GitHub Secretsを設定（README下部参照）
+
+4\. tfstateファイル保管用S3を事前作成（`aws-study-marube23-bucket`を使用）
+
+5\. mainブランチへPRを作成
+
+6\. Actions実行後、ALBのDNSへアクセス
 
 ## インフラ構成図
 
@@ -84,7 +108,7 @@
 | CIDRブロック       |  `172.16.1.0/24`/`172.16.3.0/24`       | 
 | IPアドレス割り当て | 有効 | 
 
-**Private Sunbet**
+**Private Subnet**
 - *prod*
   
 | 項目                             | 設定値                   |
@@ -206,7 +230,7 @@
 |  名称           | リソース名 |説明 |
 | :------------------------------------- | :--: |:--: |
 | `aws-waf-logs-study-***alb` | CloudWatch Logs |WAFログ保管用 |
-| `aws-study-marube23-backet` | S3 |tfstateファイル保管用  |
+| `aws-study-marube23-bucket` | S3 |tfstateファイル保管用  |
 | `aws-study-ansible-***-marube23-bucket` | S3 |Ansibleモジュール一時保管用 |
 
 **IAM**
@@ -216,13 +240,23 @@
     - GitHub OIDCを設定し、アクセスキーを使用しない。
     - EC2インスタンスにはSSM接続やS3アクセス権限を持つIAMロールをアタッチし、キーペアを使用しない。
 
+**GitHub OIDC**
+| 項目                                   | 値 |
+| :------------------------------------- | :--: |
+| プロバイダのタイプ    | `OpenID Connect`     | 
+| プロバイダの URL           | `https://token.actions.githubusercontent.com`     | 
+| 対象者                              |   `sts.amazonaws.com`   |
+| カスタム信頼ポリシー                    |   main ブランチへのプルリクエスト及びプッシュに対して実行    |
+| 許可ポリシー                     |   `AdministratorAccess`   |
+| ロール名                     |   `oidc-aws-study-role `    |
+
 **GitHub Secrets**
-| 説明                             | 変数                    |
-| :-------------------- | :----------------------: | 
-| OIDC用IAMロールARN       | `"AWS_ROLE_ARN"`        | 
-| DB ユーザー名           | `"DATABASE_MASTER_NAME"`          | 
-| DB パスワード           | `"DB_PASSWORD"`          | 
-| 通知用メールアドレス | `"MY_EMAIL"` | 
+| 説明                             | 変数                    |設定例 |
+| :-------------------- | :----------------------: | :--: |
+| OIDC用IAMロールARN       | `"AWS_ROLE_ARN"`        | `arn:aws:iam::123456789012:role/my-role` |
+| DB ユーザー名           | `"DATABASE_MASTER_NAME"`          | `my_user` |
+| DB パスワード           | `"DB_PASSWORD"`          | `my_password` |
+| 通知用メールアドレス | `"MY_EMAIL"` | `my@email.com` |
 ---
 
 ### 開発環境
@@ -308,7 +342,7 @@
 | **ansible-stage** | GitHub実行環境（ランナー）に ansible・boto3・botocore・SSMプラグインをインストール。動的inventoryを作成し、*stage*環境のEC2に Ansible Playbookを実行。 |
 | **terraform-prod-plan** | *stage*環境構築後、*prod*環境でTerraformの初期化、検証を実施(CI)。|
 | **terraform-prod-apply** | メンバー承認後、*prod*環境でリソース構築を実施(CD)。構築後にEC2 ID・S3バケット名・RDS Endpointを出力 |
-| **ansible-stage** | Github実行環境（ランナー）に ansible・boto3・botocore・SSMプラグインをインストール。動的inventoryを作成し、*prod*環境のEC2に Ansible Playbookを実行。 |
+| **ansible-prod** | Github実行環境（ランナー）に ansible・boto3・botocore・SSMプラグインをインストール。動的inventoryを作成し、*prod*環境のEC2に Ansible Playbookを実行。 |
 
 ---
 
