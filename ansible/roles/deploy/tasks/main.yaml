@@ -4,19 +4,13 @@
         src: myapp.service.j2
         dest: /etc/systemd/system/myapp.service
 
-    # systemd リロード
-    - name: Reload systemd
-      command: systemctl daemon-reexec
-
-    - name: Reload systemd daemon
-      command: systemctl daemon-reload
-
     # SpringBoot 自動起動
     - name: Start and enable myapp Service
       systemd:
         name: myapp
         enabled: yes
         state: restarted
+        daemon_reload: true
 
     # service 状態確認
     - name: Check myapp service status
