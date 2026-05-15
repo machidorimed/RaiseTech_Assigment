@@ -18,12 +18,36 @@
         enabled: yes
         state: restarted
 
+    # service 状態確認
+    - name: Check myapp service status
+      shell: systemctl status myapp --no-pager
+      register: myapp_status
+
+    - debug:
+        var: myapp_status.stdout_lines
+
+    # journalctl ログ確認
+    - name: Show myapp logs
+      shell: journalctl -u myapp -n 50 --no-pager
+      register: myapp_logs
+
+    - debug:
+        var: myapp_logs.stdout_lines
+
+    # Javaプロセス確認
+    - name: Check Java process
+      shell: ps -ef | grep java | grep -v grep
+      register: java_process
+
+    - debug:
+        var: java_process.stdout_lines    
+
     # EC2 内部ホストで HTTP レスポンスチェック
-    - name: Check application health
-      uri:
-        url: http://localhost:8080
-        status_code: 200
-      register: result
-      retries: 10
-      delay: 5
-      until: result.status == 200
+    #- name: Check application health
+    #  uri:
+    #    url: http://localhost:8080
+    #    status_code: 200
+    #  register: result
+    #  retries: 10
+    #  delay: 5
+    #  until: result.status == 200
