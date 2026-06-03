@@ -13,9 +13,13 @@
         daemon_reload: true
 
     # service 状態確認
-    - name: Check myapp service status
-      shell: systemctl status myapp --no-pager
+    - name: Wait until myapp service is active
+      shell: systemctl is-active myapp
       register: myapp_status
+      retries: 10
+      delay: 10
+      until: myapp_status.stdout == "active"
+      changed_when: false
 
     - debug:
         var: myapp_status.stdout_lines
