@@ -14,11 +14,8 @@
 
     # service 状態確認
     - name: Wait until myapp service is active
-      shell: systemctl is-active myapp
+      shell: systemctl status myapp --no-pager
       register: myapp_status
-      retries: 10
-      delay: 10
-      until: myapp_status.stdout == "active"
       changed_when: false
 
     - debug:
@@ -28,6 +25,7 @@
     - name: Show myapp logs
       shell: journalctl -u myapp -n 50 --no-pager
       register: myapp_logs
+      changed_when: false
 
     - debug:
         var: myapp_logs.stdout_lines
@@ -36,6 +34,7 @@
     - name: Check Java process
       shell: ps -ef | grep java | grep -v grep
       register: java_process
+      changed_when: false
 
     - debug:
         var: java_process.stdout_lines    
