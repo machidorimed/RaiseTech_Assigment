@@ -16,7 +16,7 @@ my_instance_type = "t3.micro"
 
 # 変数へ値の設定(database)
 my_engine            = "mysql"
-my_engine_version    = "8.0.41"
+my_engine_version    = "8.0.46"
 database_master_name = "root"
 database_name        = "awsstudy"
 my_instance_class    = "db.t4g.micro"
