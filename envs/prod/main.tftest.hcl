@@ -65,7 +65,7 @@ run "database_RDS_test" {
   }
 
   assert {
-    condition     = module.database.rds_instance_summary.engine_version == "8.0.41"
+    condition     = module.database.rds_instance_summary.engine_version == "8.0.46"
     error_message = "RDSのengine_versionが不一致"
   }
 
