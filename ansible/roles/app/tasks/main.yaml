@@ -46,8 +46,6 @@
       shell: ./gradlew build --no-daemon --stacktrace
       args:
         chdir: "{{ app_dir }}"
-      async: 600
-      poll: 10
     
     # WAR生成確認
     - name: Check WAR file
@@ -62,4 +60,11 @@
       fail:
         msg: "WAR file was not generated"
       when: not war_file.stat.exists
-      
+
+    - name: Show WAR file
+      shell: ls -l {{ app_dir }}/build/libs
+      register: war_list
+      changed_when: false
+
+    - debug:
+        var: war_list.stdout_lines
