@@ -43,6 +43,23 @@
         mode: '0755'
 
     - name: Build with Gradle
-      shell: ./gradlew build --no-daemon
+      shell: ./gradlew build --no-daemon --stacktrace
       args:
         chdir: "{{ app_dir }}"
+      async: 600
+      poll: 10
+    
+    # WAR生成確認
+    - name: Check WAR file
+      stat:
+        path: "{{ app_dir }}/build/libs/demo-0.0.1-SNAPSHOT.war"
+      register: war_file
+
+    - debug:
+        var: war_file.stat.exists
+
+    - name: Fail if WAR file does not exist
+      fail:
+        msg: "WAR file was not generated"
+      when: not war_file.stat.exists
+      
