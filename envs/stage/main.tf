@@ -78,12 +78,12 @@ module "monitoring" {
   my_email    = var.my_email
 }
 
-module "security" {
-  #moduleの位置
-  source = "../../modules/security"
-  #変数へ値の設定
-  my_env             = var.my_env
-  allow_ip_addresses = var.allow_ip_addresses
-  alb_arn            = module.compute.alb_arn
-  log_group_arn      = module.monitoring.waf_log_group_arn
-}
+# module "security" {
+#   #moduleの位置
+#   source = "../../modules/security"
+#   #変数へ値の設定
+#   my_env             = var.my_env
+#   allow_ip_addresses = var.allow_ip_addresses
+#   alb_arn            = module.compute.alb_arn
+#   log_group_arn      = module.monitoring.waf_log_group_arn
+# }
